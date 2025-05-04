@@ -805,7 +805,32 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                     onClick={() => {
                         const newDate = new Date(currentDate)
                         newDate.setMonth(currentDate.getMonth() - 1)
+                        // Pad month for consistent key format
+                        const year = newDate.getFullYear()
+                        const month = String(newDate.getMonth()).padStart(
+                            2,
+                            "0"
+                        )
+                        const preMonthKey = `${year}-${month}`
+
+                        const hasDataForMonth = sessions.some((session) => {
+                            const sessionDate = new Date(session.date)
+                            return (
+                                sessionDate.getMonth() === newDate.getMonth() &&
+                                sessionDate.getFullYear() ===
+                                    newDate.getFullYear()
+                            )
+                        })
+
                         setCurrentDate(newDate)
+
+                        if (
+                            !loadedMonths.has(preMonthKey) &&
+                            !noMoreData &&
+                            !hasDataForMonth
+                        ) {
+                            fetchMoreData(newDate)
+                        }
                     }}
                     style={{
                         background: "none",
