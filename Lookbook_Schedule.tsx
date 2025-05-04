@@ -96,6 +96,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
     // Function to fetch more data for a specific month
     const fetchMoreData = async (targetDate: Date) => {
+        console.log("fetchMoreDatea function --------", isCanvas, noMoreData)
         if (isCanvas) return
 
         // Don't fetch if we already know there's no more data
@@ -125,7 +126,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                     }),
                 }
             )
-            console.log(response)
+            console.log("fetchMoreDataResponse>>>>", response)
 
             if (!response.ok) {
                 const errorData = await response.json()
@@ -294,6 +295,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
     useEffect(() => {
         const fetchData = async () => {
+            console.log("fetchDatea function --------")
             if (isCanvas) {
                 // Mock data for Framer canvas
                 setSessions(mockData)
@@ -325,6 +327,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                         }),
                     }
                 )
+                console.log("fetchDataResponse>>>>", response)
 
                 if (!response.ok) {
                     const errorData = await response.json()
@@ -804,33 +807,15 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 <button
                     onClick={() => {
                         const newDate = new Date(currentDate)
+                        console.log("prevNewDate>>>>", newDate)
                         newDate.setMonth(currentDate.getMonth() - 1)
-                        // Pad month for consistent key format
-                        const year = newDate.getFullYear()
-                        const month = String(newDate.getMonth()).padStart(
-                            2,
-                            "0"
-                        )
-                        const preMonthKey = `${year}-${month}`
-
-                        const hasDataForMonth = sessions.some((session) => {
-                            const sessionDate = new Date(session.date)
-                            return (
-                                sessionDate.getMonth() === newDate.getMonth() &&
-                                sessionDate.getFullYear() ===
-                                    newDate.getFullYear()
-                            )
-                        })
-
                         setCurrentDate(newDate)
+                        console.log("prevDate>>>>", newDate)
 
-                        if (
-                            !loadedMonths.has(preMonthKey) &&
-                            !noMoreData &&
-                            !hasDataForMonth
-                        ) {
-                            fetchMoreData(newDate)
-                        }
+                        // Check if we need to load more data
+                        const monthKey = `${newDate.getFullYear()}-${newDate.getMonth()}`
+                        setNoMoreData(false)
+                        fetchMoreData(newDate)
                     }}
                     style={{
                         background: "none",
@@ -852,8 +837,10 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 <button
                     onClick={() => {
                         const newDate = new Date(currentDate)
+                        console.log("prevNewDate>>>>", newDate)
                         newDate.setMonth(currentDate.getMonth() + 1)
                         setCurrentDate(newDate)
+                        console.log("nextDate>>>>", newDate)
 
                         // Check if we need to load more data
                         const monthKey = `${newDate.getFullYear()}-${newDate.getMonth()}`
