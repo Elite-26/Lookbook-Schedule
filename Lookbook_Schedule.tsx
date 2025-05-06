@@ -83,6 +83,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
     // Refs for positioning
     const calendarRef = useRef<HTMLDivElement>(null)
     const previewRef = useRef<HTMLDivElement>(null)
+    const slideRef = useRef<HTMLDivElement>(null)
     const modalRef = useRef<HTMLDivElement>(null)
 
     // Styling Defaults & Helpers
@@ -468,6 +469,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         setHoverDataOfDefault(filterTemp)
       } else {
         setHoverDataOfDefault(null)
+        setSlideIndex(0)
       }
     }, [hoveredSession])
 
@@ -553,6 +555,19 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
       setCompactData(null)
       setCompactIndex(null)
     }
+
+    const [slideIndex, setSlideIndex] = useState(0);
+    useEffect(() => {
+      if(hoverDataOfDefault) {
+        const interval = setInterval(() => {
+          setSlideIndex((prev) =>
+            (prev + 1) % hoverDataOfDefault.length
+          );
+        }, 1500) // Change every 3 seconds
+    
+        return () => clearInterval(interval)
+      }
+    }, [hoverDataOfDefault])
 
     // Render calendar grid
     const renderCalendar = () => {
@@ -1493,103 +1508,70 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
             )}
             {viewType === "default" && hoveredSession && hoverDataOfDefault && showPhotosOnHover && !isCanvas && !isMobile && (
               <div
+              style={{
+                position: "absolute",
+                bottom: hoverPosition.y,
+                left: hoverPosition.x,
+                zIndex: 100,
+                transition: "all 0.5s ease-in-out",
+              }}
+            >
+              <div
+                ref={slideRef}
                 style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '5px',
-                  position: "absolute",
-                  bottom: hoverPosition.y,
-                  left: hoverPosition.x,
-                  zIndex: 100
+                  backgroundColor: "white",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  padding: "16px",
+                  width: "300px",
+                  pointerEvents: "none",
                 }}
               >
-                {hoverDataOfDefault.map((session) => (
-                  <div
-                      ref={previewRef}
-                      style={{
-                          // position: "absolute",
-                          // bottom: hoverPosition.y,
-                          // left: hoverPosition.x,
-                          backgroundColor: "white",
-                          borderRadius: "8px",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                          padding: "16px",
-                          width: "300px",
-                          zIndex: 100,
-                          pointerEvents: "none",
-                      }}
-                  >
-                      {(session.modelImage ||
-                          session.locationImage) && (
-                          <div
-                              style={{
-                                  display: "flex",
-                                  gap: "12px",
-                                  marginBottom: "12px",
-                              }}
-                          >
-                              {session.modelImage && (
-                                  <img
-                                      src={session.modelImage}
-                                      alt={session.model}
-                                      style={{
-                                          width: "100px",
-                                          height: "100px",
-                                          objectFit: "cover",
-                                          borderRadius: "6px",
-                                      }}
-                                  />
-                              )}
-                              {session.locationImage && (
-                                  <img
-                                      src={session.locationImage}
-                                      alt={session.location}
-                                      style={{
-                                          width: "100px",
-                                          height: "100px",
-                                          objectFit: "cover",
-                                          borderRadius: "6px",
-                                      }}
-                                  />
-                              )}
-                          </div>
-                      )}
-
-                      <h4 style={{ margin: "0 0 8px 0", color: primaryColor }}>
-                          {session.model}
-                      </h4>
-                      <p
-                          style={{
-                              margin: "0 0 4px 0",
-                              color: secondaryTextColor,
-                              fontSize: "14px",
-                          }}
-                      >
-                          {session.location}
-                      </p>
-                      <p
-                          style={{
-                              margin: "0 0 4px 0",
-                              color: secondaryTextColor,
-                              fontSize: "14px",
-                          }}
-                      >
-                          Price: ${session.price}
-                      </p>
-                      {session.modelDetails && (
-                          <p
-                              style={{
-                                  margin: "0",
-                                  color: secondaryTextColor,
-                                  fontSize: "12px",
-                              }}
-                          >
-                              {session.modelDetails}
-                          </p>
-                      )}
+                {(hoverDataOfDefault[slideIndex].modelImage || hoverDataOfDefault[slideIndex].locationImage) && (
+                  <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                    {hoverDataOfDefault[slideIndex].modelImage && (
+                      <img
+                        src={hoverDataOfDefault[slideIndex].modelImage}
+                        alt={hoverDataOfDefault[slideIndex].model}
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          objectFit: "cover",
+                          borderRadius: "6px",
+                        }}
+                      />
+                    )}
+                    {hoverDataOfDefault[slideIndex].locationImage && (
+                      <img
+                        src={hoverDataOfDefault[slideIndex].locationImage}
+                        alt={hoverDataOfDefault[slideIndex].location}
+                        style={{
+                          width: "100px",
+                          height: "100px",
+                          objectFit: "cover",
+                          borderRadius: "6px",
+                        }}
+                      />
+                    )}
                   </div>
-                ))}
+                )}
+        
+                <h4 style={{ margin: "0 0 8px 0", color: primaryColor }}>
+                  {hoverDataOfDefault[slideIndex].model}
+                </h4>
+                <p style={{ margin: "0 0 4px 0", color: secondaryTextColor, fontSize: "14px" }}>
+                  {hoverDataOfDefault[slideIndex].location}
+                </p>
+                <p style={{ margin: "0 0 4px 0", color: secondaryTextColor, fontSize: "14px" }}>
+                  Price: ${hoverDataOfDefault[slideIndex].price}
+                </p>
+                {hoverDataOfDefault[slideIndex].modelDetails && (
+                  <p style={{ margin: "0", color: secondaryTextColor, fontSize: "12px" }}>
+                    {hoverDataOfDefault[slideIndex].modelDetails}
+                  </p>
+                )}
               </div>
+            </div>
             )}
         </div>
     )
