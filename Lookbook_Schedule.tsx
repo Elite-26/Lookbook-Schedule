@@ -71,7 +71,9 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         defaultViewType
     )
     const [selectedDate, setSelectedDate] = useState<string | null>(null)
-    const [hoveredSession, setHoveredSession] = useState<PhotoSession | null>(null)
+    const [hoveredSession, setHoveredSession] = useState<PhotoSession | null>(
+        null
+    )
     const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 })
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -294,16 +296,21 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
     const [compactIndex, setCompactIndex] = useState(null)
     const [compactdata, setCompactData] = useState<PhotoSession | null>(null)
-    const selectDateHandleCompact = (sessionsThisMonth: PhotoSession[], session: PhotoSession) => {
-      setSelectedDate(session.date)
+    const selectDateHandleCompact = (
+        sessionsThisMonth: PhotoSession[],
+        session: PhotoSession
+    ) => {
+        setSelectedDate(session.date)
 
-      const index = sessionsThisMonth.findIndex(s => s.date === session.date && s.model === session.model);
-      setCompactIndex(index)
-      setCompactData(sessionsThisMonth[index])
+        const index = sessionsThisMonth.findIndex(
+            (s) => s.date === session.date && s.model === session.model
+        )
+        setCompactIndex(index)
+        setCompactData(sessionsThisMonth[index])
     }
     const selectDateHandle = (date: string) => {
-      setSelectedDate(date)
-      setCompactData(null)
+        setSelectedDate(date)
+        setCompactData(null)
     }
 
     useEffect(() => {
@@ -436,41 +443,41 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
     }, [isCanvas])
 
     const [filteredByDate, setFilteredByDate] = useState(null)
-    const [currentIndex, setCurrentIndex] = useState(0);
+    const [currentIndex, setCurrentIndex] = useState(0)
     useEffect(() => {
-      if(selectedDate) {
-        const filterTemp = filteredSessions.filter(
-          (session) => session.date === selectedDate
-        );
-        setFilteredByDate(filterTemp)
-      } else {
-        setFilteredByDate(null)
-      }
+        if (selectedDate) {
+            const filterTemp = filteredSessions.filter(
+                (session) => session.date === selectedDate
+            )
+            setFilteredByDate(filterTemp)
+        } else {
+            setFilteredByDate(null)
+        }
     }, [selectedDate])
 
     const goNext = () => {
-      if (filteredByDate && currentIndex < filteredByDate.length - 1) {
-        setCurrentIndex((prev) => prev + 1);
-      }
-    };
-    
+        if (filteredByDate && currentIndex < filteredByDate.length - 1) {
+            setCurrentIndex((prev) => prev + 1)
+        }
+    }
+
     const goPrev = () => {
-      if (filteredByDate && currentIndex > 0) {
-        setCurrentIndex((prev) => prev - 1);
-      }
-    };
+        if (filteredByDate && currentIndex > 0) {
+            setCurrentIndex((prev) => prev - 1)
+        }
+    }
 
     const [hoverDataOfDefault, setHoverDataOfDefault] = useState(null)
     useEffect(() => {
-      if(viewType === "default" && hoveredSession) {
-        const filterTemp = filteredSessions.filter(
-          (session) => session.date === hoveredSession.date
-        ).slice(0, 5)
-        setHoverDataOfDefault(filterTemp)
-      } else {
-        setHoverDataOfDefault(null)
-        setSlideIndex(0)
-      }
+        if (viewType === "default" && hoveredSession) {
+            const filterTemp = filteredSessions
+                .filter((session) => session.date === hoveredSession.date)
+                .slice(0, 5)
+            setHoverDataOfDefault(filterTemp)
+        } else {
+            setHoverDataOfDefault(null)
+            setSlideIndex(0)
+        }
     }, [hoveredSession])
 
     // Filter sessions by location
@@ -551,22 +558,20 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
     //close button handle
     const closeButtonHandle = () => {
-      setSelectedDate(null)
-      setCompactData(null)
-      setCompactIndex(null)
+        setSelectedDate(null)
+        setCompactData(null)
+        setCompactIndex(null)
     }
 
-    const [slideIndex, setSlideIndex] = useState(0);
+    const [slideIndex, setSlideIndex] = useState(0)
     useEffect(() => {
-      if(hoverDataOfDefault) {
-        const interval = setInterval(() => {
-          setSlideIndex((prev) =>
-            (prev + 1) % hoverDataOfDefault.length
-          );
-        }, 1500) // Change every 3 seconds
-    
-        return () => clearInterval(interval)
-      }
+        if (hoverDataOfDefault) {
+            const interval = setInterval(() => {
+                setSlideIndex((prev) => (prev + 1) % hoverDataOfDefault.length)
+            }, 1500) // Change every 3 seconds
+
+            return () => clearInterval(interval)
+        }
     }, [hoverDataOfDefault])
 
     // Render calendar grid
@@ -606,92 +611,99 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                             No shoots scheduled for this month
                         </div>
                     ) : (
-                        sessionsThisMonth.map((session: PhotoSession, idx: number) => (
-                            <div
-                                key={'session-' + idx}
-                                onMouseEnter={(e) =>
-                                    handleSessionHover(e, session)
-                                }
-                                onMouseLeave={() => setHoveredSession(null)}
-                                // onClick={() => selectDateHandle(session.date)}
-                                onClick={() => selectDateHandleCompact(sessionsThisMonth, session)}
-                                style={{
-                                    padding: "12px 20px",
-                                    marginBottom: "12px",
-                                    border: `1px solid ${getStatusColor(session.status)}`,
-                                    borderRadius: "6px",
-                                    cursor: "pointer",
-                                    backgroundColor:
-                                        idx === compactIndex
-                                        // selectedDate === session.date
-                                            ? primaryColor
-                                            : "white",
-                                    color:
-                                        idx === compactIndex
-                                            ? primaryTextColor
-                                            : primaryColor,
-                                    transition: "all 0.2s ease",
-                                }}
-                            >
+                        sessionsThisMonth.map(
+                            (session: PhotoSession, idx: number) => (
                                 <div
+                                    key={"session-" + idx}
+                                    onMouseEnter={(e) =>
+                                        handleSessionHover(e, session)
+                                    }
+                                    onMouseLeave={() => setHoveredSession(null)}
+                                    // onClick={() => selectDateHandle(session.date)}
+                                    onClick={() =>
+                                        selectDateHandleCompact(
+                                            sessionsThisMonth,
+                                            session
+                                        )
+                                    }
                                     style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
+                                        padding: "12px 20px",
+                                        marginBottom: "12px",
+                                        border: `1px solid ${getStatusColor(session.status)}`,
+                                        borderRadius: "6px",
+                                        cursor: "pointer",
+                                        backgroundColor:
+                                            idx === compactIndex
+                                                ? // selectedDate === session.date
+                                                  primaryColor
+                                                : "white",
+                                        color:
+                                            idx === compactIndex
+                                                ? primaryTextColor
+                                                : primaryColor,
+                                        transition: "all 0.2s ease",
                                     }}
                                 >
                                     <div
                                         style={{
-                                            fontSize: "14px",
                                             display: "flex",
-                                            flexDirection: "column",
-                                            gap: "4px",
+                                            justifyContent: "space-between",
+                                            alignItems: "center",
                                         }}
                                     >
-                                        <div style={{ fontWeight: 600 }}>
-                                            {session.date}
+                                        <div
+                                            style={{
+                                                fontSize: "14px",
+                                                display: "flex",
+                                                flexDirection: "column",
+                                                gap: "4px",
+                                            }}
+                                        >
+                                            <div style={{ fontWeight: 600 }}>
+                                                {session.date}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    color: secondaryTextColor,
+                                                }}
+                                            >
+                                                Model: ${session.model}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    color: secondaryTextColor,
+                                                }}
+                                            >
+                                                Price: ${session.price}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    color: secondaryTextColor,
+                                                }}
+                                            >
+                                                Location: ${session.location}
+                                            </div>
                                         </div>
                                         <div
                                             style={{
-                                                color: secondaryTextColor,
+                                                padding: "8px 12px",
+                                                borderRadius: "4px",
+                                                backgroundColor: getStatusColor(
+                                                    session.status
+                                                ),
+                                                color: "white",
+                                                fontSize: "14px",
                                             }}
                                         >
-                                            Model: ${session.model}
+                                            {session.status
+                                                .charAt(0)
+                                                .toUpperCase() +
+                                                session.status.slice(1)}
                                         </div>
-                                        <div
-                                            style={{
-                                                color: secondaryTextColor,
-                                            }}
-                                        >
-                                            Price: ${session.price}
-                                        </div>
-                                        <div
-                                            style={{
-                                                color: secondaryTextColor,
-                                            }}
-                                        >
-                                            Location: ${session.location}
-                                        </div>
-                                    </div>
-                                    <div
-                                        style={{
-                                            padding: "8px 12px",
-                                            borderRadius: "4px",
-                                            backgroundColor: getStatusColor(
-                                                session.status
-                                            ),
-                                            color: "white",
-                                            fontSize: "14px",
-                                        }}
-                                    >
-                                        {session.status
-                                            .charAt(0)
-                                            .toUpperCase() +
-                                            session.status.slice(1)}
                                     </div>
                                 </div>
-                            </div>
-                        ))
+                            )
+                        )
                     )}
                 </div>
             )
@@ -1091,488 +1103,589 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
             </div>
 
             {/* Selected Date Details in Default View */}
-            {viewType === "default" && filteredByDate && filteredByDate.length > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: isMobile ? "60px" : "360px",
-                    left: isMobile ? "16px" : "",
-                    right: isMobile ? "16px" : "",
-                    margin: isMobile ? "0 auto" : undefined,
-                    padding: "16px",
-                    backgroundColor: "#ffffff",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-                    border: "1px solid #e5e7eb",
-                    zIndex: 50,
-                    width: isMobile ? "" : "600px",
-                  }}
-                >
-                  <button
-                    onClick={goPrev}
-                    disabled={currentIndex === 0}
-                    style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "90px",
-                      background: "none",
-                      border: "none",
-                      fontSize: "24px",
-                      color: secondaryTextColor,
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                  >
-                    {filteredByDate.length > 1 ? '<' : null}
-                  </button>
-
-                  <button
-                    onClick={goNext}
-                    disabled={currentIndex === filteredByDate.length - 1}
-                    style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "50px",
-                      background: "none",
-                      border: "none",
-                      fontSize: "24px",
-                      color: secondaryTextColor,
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                  >
-                    {filteredByDate.length > 1 ? '>' : null}
-                  </button>
-
-                  {/* Close Button */}
-                  <button
-                    onClick={() => closeButtonHandle()}
-                    style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "8px",
-                      background: "none",
-                      border: "none",
-                      fontSize: "24px",
-                      color: secondaryTextColor,
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                    aria-label="Close"
-                  >
-                    ×
-                  </button>
-
-                  {/* Modal Content */}
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "16px",
-                    }}
-                  >
-                    {/* Thumbnail */}
+            {viewType === "default" &&
+                filteredByDate &&
+                filteredByDate.length > 0 && (
                     <div
-                      style={{
-                        aspectRatio: "4 / 5",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        backgroundColor: "#f3f4f6",
-                      }}
-                    >
-                      {filteredByDate[currentIndex]?.thumbnailUrl && (
-                        <img
-                          src={filteredByDate[currentIndex]?.thumbnailUrl}
-                          alt={filteredByDate[currentIndex]?.model}
-                          style={{
-                            width: isMobile ? "100px" : "200px",
-                            height: "100%",
-                            objectFit: "cover",
-                            maxWidth: "100%",
-                            maxHeight: "100%",
-                            display: "block",
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {/* Session Text Details */}
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <h3
                         style={{
-                          margin: "0 0 8px 0",
-                          color: primaryColor,
+                            display: "flex",
+                            justifyContent: "center",
                         }}
-                      >
-                        {filteredByDate[currentIndex]?.model || "Unknown Model"}
-                      </h3>
-                      <p style={modalTextStyle}>
-                        Location: {filteredByDate[currentIndex]?.location || "Unknown"}
-                      </p>
-                      <p style={modalTextStyle}>
-                        Price: ${filteredByDate[currentIndex]?.price || 0}
-                      </p>
-                      <p style={modalTextStyle}>
-                        Status: {filteredByDate[currentIndex]?.status}
-                      </p>
-                      {filteredByDate[currentIndex]?.modelDetails && (
-                        <p style={modalTextStyle}>
-                          {filteredByDate[currentIndex]?.modelDetails}
-                        </p>
-                      )}
-                      {filteredByDate[currentIndex]?.modelSizing && (
-                        <p style={modalTextStyle}>
-                          {filteredByDate[currentIndex]?.modelSizing}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* WhatsApp Booking Button */}
-                  <button
-                    onClick={() => openWhatsApp(filteredByDate[currentIndex])}
-                    disabled={filteredByDate[currentIndex]?.status === "full"}
-                    style={{
-                      marginTop: "16px",
-                      width: "100%",
-                      padding: "12px",
-                      backgroundColor:
-                        filteredByDate[currentIndex]?.status === "full"
-                          ? "#9CA3AF"
-                          : "#25D366",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor:
-                        filteredByDate[currentIndex]?.status === "full"
-                          ? "not-allowed"
-                          : "pointer",
-                      fontWeight: 600,
-                      fontSize: "16px",
-                    }}
-                  >
-                    {filteredByDate[currentIndex]?.status === "full"
-                      ? "Fully Booked"
-                      : "Book via WhatsApp"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Selected Date Details in Compact View */}
-            {viewType === "compact" && compactdata && filteredByDate && filteredByDate.length > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center"
-                }}
-              >
-                <div
-                  style={{
-                    position: "absolute",
-                    bottom: isMobile ? "60px" : "360px",
-                    left: isMobile ? "16px" : "",
-                    right: isMobile ? "16px" : "",
-                    margin: isMobile ? "0 auto" : undefined,
-                    padding: "16px",
-                    backgroundColor: "#ffffff",
-                    borderRadius: "12px",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-                    border: "1px solid #e5e7eb",
-                    zIndex: 50,
-                    width: isMobile ? "" : "600px",
-                  }}
-                >
-                  {/* Close Button */}
-                  <button
-                    onClick={() => closeButtonHandle()}
-                    style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "8px",
-                      background: "none",
-                      border: "none",
-                      fontSize: "24px",
-                      color: secondaryTextColor,
-                      cursor: "pointer",
-                      padding: 0,
-                    }}
-                    aria-label="Close"
-                  >
-                    ×
-                  </button>
-
-                  {/* Modal Content */}
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "16px",
-                    }}
-                  >
-                    {/* Thumbnail */}
-                    <div
-                      style={{
-                        aspectRatio: "4 / 5",
-                        borderRadius: "8px",
-                        overflow: "hidden",
-                        backgroundColor: "#f3f4f6",
-                      }}
                     >
-                      {compactdata.thumbnailUrl && (
-                        <img
-                          src={compactdata.thumbnailUrl}
-                          alt={compactdata.model}
-                          style={{
-                            width: isMobile ? "100px" : "200px",
-                            height: "100%",
-                            objectFit: "cover",
-                            maxWidth: "100%",
-                            maxHeight: "100%",
-                            display: "block",
-                          }}
-                        />
-                      )}
-                    </div>
-
-                    {/* Session Text Details */}
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <h3
-                        style={{
-                          margin: "0 0 8px 0",
-                          color: primaryColor,
-                        }}
-                      >
-                        {compactdata.model || "Unknown Model"}
-                      </h3>
-                      <p style={modalTextStyle}>
-                        Location: {compactdata.location || "Unknown"}
-                      </p>
-                      <p style={modalTextStyle}>
-                        Price: ${compactdata.price || 0}
-                      </p>
-                      <p style={modalTextStyle}>
-                        Status: {compactdata.status}
-                      </p>
-                      {compactdata.modelDetails && (
-                        <p style={modalTextStyle}>
-                          {compactdata.modelDetails}
-                        </p>
-                      )}
-                      {compactdata.modelSizing && (
-                        <p style={modalTextStyle}>
-                          {compactdata.modelSizing}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* WhatsApp Booking Button */}
-                  <button
-                    onClick={() => openWhatsApp(filteredByDate[currentIndex])}
-                    disabled={compactdata.status === "full"}
-                    style={{
-                      marginTop: "16px",
-                      width: "100%",
-                      padding: "12px",
-                      backgroundColor:
-                      compactdata.status === "full"
-                          ? "#9CA3AF"
-                          : "#25D366",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor:
-                      compactdata.status === "full"
-                          ? "not-allowed"
-                          : "pointer",
-                      fontWeight: 600,
-                      fontSize: "16px",
-                    }}
-                  >
-                    {compactdata.status === "full"
-                      ? "Fully Booked"
-                      : "Book via WhatsApp"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Hover Preview */}
-            {/* Hover Preview */}
-            {viewType === "compact" && hoveredSession && showPhotosOnHover && !isCanvas && !isMobile && (
-                <div
-                    ref={previewRef}
-                    style={{
-                      position: "absolute",
-                      bottom: hoverPosition.y,
-                      left: hoverPosition.x,
-                      backgroundColor: "white",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                      padding: "16px",
-                      width: "300px",
-                      zIndex: 10,
-                      pointerEvents: "none",
-                    }}
-                >
-                    {(hoveredSession.modelImage ||
-                        hoveredSession.locationImage) && (
                         <div
                             style={{
-                                display: "flex",
-                                gap: "12px",
-                                marginBottom: "12px",
+                                position: "absolute",
+                                bottom: isMobile ? "60px" : "360px",
+                                left: isMobile ? "16px" : "",
+                                right: isMobile ? "16px" : "",
+                                margin: isMobile ? "0 auto" : undefined,
+                                padding: "16px",
+                                backgroundColor: "#ffffff",
+                                borderRadius: "12px",
+                                boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                                border: "1px solid #e5e7eb",
+                                zIndex: 50,
+                                width: isMobile ? "" : "600px",
                             }}
                         >
-                            {hoveredSession.modelImage && (
-                                <img
-                                    src={hoveredSession.modelImage}
-                                    alt={hoveredSession.model}
-                                    style={{
-                                        width: "100px",
-                                        height: "100px",
-                                        objectFit: "cover",
-                                        borderRadius: "6px",
-                                    }}
-                                />
-                            )}
-                            {hoveredSession.locationImage && (
-                                <img
-                                    src={hoveredSession.locationImage}
-                                    alt={hoveredSession.location}
-                                    style={{
-                                        width: "100px",
-                                        height: "100px",
-                                        objectFit: "cover",
-                                        borderRadius: "6px",
-                                    }}
-                                />
-                            )}
-                        </div>
-                    )}
+                            <button
+                                onClick={goPrev}
+                                disabled={currentIndex === 0}
+                                style={{
+                                    position: "absolute",
+                                    top: "8px",
+                                    right: "90px",
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: secondaryTextColor,
+                                    cursor: "pointer",
+                                    padding: 0,
+                                }}
+                            >
+                                {filteredByDate.length > 1 ? "<" : null}
+                            </button>
 
-                    <h4 style={{ margin: "0 0 8px 0", color: primaryColor }}>
-                        {hoveredSession.model}
-                    </h4>
-                    <p
+                            <button
+                                onClick={goNext}
+                                disabled={
+                                    currentIndex === filteredByDate.length - 1
+                                }
+                                style={{
+                                    position: "absolute",
+                                    top: "8px",
+                                    right: "50px",
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: secondaryTextColor,
+                                    cursor: "pointer",
+                                    padding: 0,
+                                }}
+                            >
+                                {filteredByDate.length > 1 ? ">" : null}
+                            </button>
+
+                            {/* Close Button */}
+                            <button
+                                onClick={() => closeButtonHandle()}
+                                style={{
+                                    position: "absolute",
+                                    top: "8px",
+                                    right: "8px",
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: secondaryTextColor,
+                                    cursor: "pointer",
+                                    padding: 0,
+                                }}
+                                aria-label="Close"
+                            >
+                                ×
+                            </button>
+
+                            {/* Modal Content */}
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "16px",
+                                }}
+                            >
+                                {/* Thumbnail */}
+                                <div
+                                    style={{
+                                        aspectRatio: "4 / 5",
+                                        borderRadius: "8px",
+                                        overflow: "hidden",
+                                        backgroundColor: "#f3f4f6",
+                                    }}
+                                >
+                                    {filteredByDate[currentIndex]
+                                        ?.thumbnailUrl && (
+                                        <img
+                                            src={
+                                                filteredByDate[currentIndex]
+                                                    ?.thumbnailUrl
+                                            }
+                                            alt={
+                                                filteredByDate[currentIndex]
+                                                    ?.model
+                                            }
+                                            style={{
+                                                width: isMobile
+                                                    ? "100px"
+                                                    : "200px",
+                                                height: "100%",
+                                                objectFit: "cover",
+                                                maxWidth: "100%",
+                                                maxHeight: "100%",
+                                                display: "block",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Session Text Details */}
+                                <div
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        gap: "4px",
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            margin: "0 0 8px 0",
+                                            color: primaryColor,
+                                        }}
+                                    >
+                                        {filteredByDate[currentIndex]?.model ||
+                                            "Unknown Model"}
+                                    </h3>
+                                    <p style={modalTextStyle}>
+                                        Location:{" "}
+                                        {filteredByDate[currentIndex]
+                                            ?.location || "Unknown"}
+                                    </p>
+                                    <p style={modalTextStyle}>
+                                        Price: $
+                                        {filteredByDate[currentIndex]?.price ||
+                                            0}
+                                    </p>
+                                    <p style={modalTextStyle}>
+                                        Status:{" "}
+                                        {filteredByDate[currentIndex]?.status}
+                                    </p>
+                                    {filteredByDate[currentIndex]
+                                        ?.modelDetails && (
+                                        <p style={modalTextStyle}>
+                                            {
+                                                filteredByDate[currentIndex]
+                                                    ?.modelDetails
+                                            }
+                                        </p>
+                                    )}
+                                    {filteredByDate[currentIndex]
+                                        ?.modelSizing && (
+                                        <p style={modalTextStyle}>
+                                            {
+                                                filteredByDate[currentIndex]
+                                                    ?.modelSizing
+                                            }
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* WhatsApp Booking Button */}
+                            <button
+                                onClick={() =>
+                                    openWhatsApp(filteredByDate[currentIndex])
+                                }
+                                disabled={
+                                    filteredByDate[currentIndex]?.status ===
+                                    "full"
+                                }
+                                style={{
+                                    marginTop: "16px",
+                                    width: "100%",
+                                    padding: "12px",
+                                    backgroundColor:
+                                        filteredByDate[currentIndex]?.status ===
+                                        "full"
+                                            ? "#9CA3AF"
+                                            : "#25D366",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor:
+                                        filteredByDate[currentIndex]?.status ===
+                                        "full"
+                                            ? "not-allowed"
+                                            : "pointer",
+                                    fontWeight: 600,
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {filteredByDate[currentIndex]?.status === "full"
+                                    ? "Fully Booked"
+                                    : "Book via WhatsApp"}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+            {/* Selected Date Details in Compact View */}
+            {viewType === "compact" &&
+                compactdata &&
+                filteredByDate &&
+                filteredByDate.length > 0 && (
+                    <div
                         style={{
-                            margin: "0 0 4px 0",
-                            color: secondaryTextColor,
-                            fontSize: "14px",
+                            display: "flex",
+                            justifyContent: "center",
                         }}
                     >
-                        {hoveredSession.location}
-                    </p>
-                    <p
+                        <div
+                            style={{
+                                position: "absolute",
+                                bottom: isMobile ? "60px" : "360px",
+                                left: isMobile ? "16px" : "",
+                                right: isMobile ? "16px" : "",
+                                margin: isMobile ? "0 auto" : undefined,
+                                padding: "16px",
+                                backgroundColor: "#ffffff",
+                                borderRadius: "12px",
+                                boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                                border: "1px solid #e5e7eb",
+                                zIndex: 50,
+                                width: isMobile ? "" : "600px",
+                            }}
+                        >
+                            {/* Close Button */}
+                            <button
+                                onClick={() => closeButtonHandle()}
+                                style={{
+                                    position: "absolute",
+                                    top: "8px",
+                                    right: "8px",
+                                    background: "none",
+                                    border: "none",
+                                    fontSize: "24px",
+                                    color: secondaryTextColor,
+                                    cursor: "pointer",
+                                    padding: 0,
+                                }}
+                                aria-label="Close"
+                            >
+                                ×
+                            </button>
+
+                            {/* Modal Content */}
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "16px",
+                                }}
+                            >
+                                {/* Thumbnail */}
+                                <div
+                                    style={{
+                                        aspectRatio: "4 / 5",
+                                        borderRadius: "8px",
+                                        overflow: "hidden",
+                                        backgroundColor: "#f3f4f6",
+                                    }}
+                                >
+                                    {compactdata.thumbnailUrl && (
+                                        <img
+                                            src={compactdata.thumbnailUrl}
+                                            alt={compactdata.model}
+                                            style={{
+                                                width: isMobile
+                                                    ? "100px"
+                                                    : "200px",
+                                                height: "100%",
+                                                objectFit: "cover",
+                                                maxWidth: "100%",
+                                                maxHeight: "100%",
+                                                display: "block",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+
+                                {/* Session Text Details */}
+                                <div
+                                    style={{
+                                        flex: 1,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "center",
+                                        gap: "4px",
+                                    }}
+                                >
+                                    <h3
+                                        style={{
+                                            margin: "0 0 8px 0",
+                                            color: primaryColor,
+                                        }}
+                                    >
+                                        {compactdata.model || "Unknown Model"}
+                                    </h3>
+                                    <p style={modalTextStyle}>
+                                        Location:{" "}
+                                        {compactdata.location || "Unknown"}
+                                    </p>
+                                    <p style={modalTextStyle}>
+                                        Price: ${compactdata.price || 0}
+                                    </p>
+                                    <p style={modalTextStyle}>
+                                        Status: {compactdata.status}
+                                    </p>
+                                    {compactdata.modelDetails && (
+                                        <p style={modalTextStyle}>
+                                            {compactdata.modelDetails}
+                                        </p>
+                                    )}
+                                    {compactdata.modelSizing && (
+                                        <p style={modalTextStyle}>
+                                            {compactdata.modelSizing}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* WhatsApp Booking Button */}
+                            <button
+                                onClick={() =>
+                                    openWhatsApp(filteredByDate[currentIndex])
+                                }
+                                disabled={compactdata.status === "full"}
+                                style={{
+                                    marginTop: "16px",
+                                    width: "100%",
+                                    padding: "12px",
+                                    backgroundColor:
+                                        compactdata.status === "full"
+                                            ? "#9CA3AF"
+                                            : "#25D366",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "6px",
+                                    cursor:
+                                        compactdata.status === "full"
+                                            ? "not-allowed"
+                                            : "pointer",
+                                    fontWeight: 600,
+                                    fontSize: "16px",
+                                }}
+                            >
+                                {compactdata.status === "full"
+                                    ? "Fully Booked"
+                                    : "Book via WhatsApp"}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+            {/* Hover Preview */}
+            {/* Hover Preview */}
+            {viewType === "compact" &&
+                hoveredSession &&
+                showPhotosOnHover &&
+                !isCanvas &&
+                !isMobile && (
+                    <div
+                        ref={previewRef}
                         style={{
-                            margin: "0 0 4px 0",
-                            color: secondaryTextColor,
-                            fontSize: "14px",
+                            position: "absolute",
+                            bottom: hoverPosition.y,
+                            left: hoverPosition.x,
+                            backgroundColor: "white",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                            padding: "16px",
+                            width: "300px",
+                            zIndex: 10,
+                            pointerEvents: "none",
                         }}
                     >
-                        Price: ${hoveredSession.price}
-                    </p>
-                    {hoveredSession.modelDetails && (
+                        {(hoveredSession.modelImage ||
+                            hoveredSession.locationImage) && (
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: "12px",
+                                    marginBottom: "12px",
+                                }}
+                            >
+                                {hoveredSession.modelImage && (
+                                    <img
+                                        src={hoveredSession.modelImage}
+                                        alt={hoveredSession.model}
+                                        style={{
+                                            width: "100px",
+                                            height: "100px",
+                                            objectFit: "cover",
+                                            borderRadius: "6px",
+                                        }}
+                                    />
+                                )}
+                                {hoveredSession.locationImage && (
+                                    <img
+                                        src={hoveredSession.locationImage}
+                                        alt={hoveredSession.location}
+                                        style={{
+                                            width: "100px",
+                                            height: "100px",
+                                            objectFit: "cover",
+                                            borderRadius: "6px",
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        )}
+
+                        <h4
+                            style={{ margin: "0 0 8px 0", color: primaryColor }}
+                        >
+                            {hoveredSession.model}
+                        </h4>
                         <p
                             style={{
-                                margin: "0",
+                                margin: "0 0 4px 0",
                                 color: secondaryTextColor,
-                                fontSize: "12px",
+                                fontSize: "14px",
                             }}
                         >
-                            {hoveredSession.modelDetails}
+                            {hoveredSession.location}
                         </p>
-                    )}
-                </div>
-            )}
-            {viewType === "default" && hoveredSession && hoverDataOfDefault && showPhotosOnHover && !isCanvas && !isMobile && (
-              <div
-              style={{
-                position: "absolute",
-                bottom: hoverPosition.y,
-                left: hoverPosition.x,
-                zIndex: 100,
-                transition: "all 0.5s ease-in-out",
-              }}
-            >
-              <div
-                ref={slideRef}
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  padding: "16px",
-                  width: "300px",
-                  pointerEvents: "none",
-                }}
-              >
-                {(hoverDataOfDefault[slideIndex].modelImage || hoverDataOfDefault[slideIndex].locationImage) && (
-                  <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
-                    {hoverDataOfDefault[slideIndex].modelImage && (
-                      <img
-                        src={hoverDataOfDefault[slideIndex].modelImage}
-                        alt={hoverDataOfDefault[slideIndex].model}
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                        }}
-                      />
-                    )}
-                    {hoverDataOfDefault[slideIndex].locationImage && (
-                      <img
-                        src={hoverDataOfDefault[slideIndex].locationImage}
-                        alt={hoverDataOfDefault[slideIndex].location}
-                        style={{
-                          width: "100px",
-                          height: "100px",
-                          objectFit: "cover",
-                          borderRadius: "6px",
-                        }}
-                      />
-                    )}
-                  </div>
+                        <p
+                            style={{
+                                margin: "0 0 4px 0",
+                                color: secondaryTextColor,
+                                fontSize: "14px",
+                            }}
+                        >
+                            Price: ${hoveredSession.price}
+                        </p>
+                        {hoveredSession.modelDetails && (
+                            <p
+                                style={{
+                                    margin: "0",
+                                    color: secondaryTextColor,
+                                    fontSize: "12px",
+                                }}
+                            >
+                                {hoveredSession.modelDetails}
+                            </p>
+                        )}
+                    </div>
                 )}
-        
-                <h4 style={{ margin: "0 0 8px 0", color: primaryColor }}>
-                  {hoverDataOfDefault[slideIndex].model}
-                </h4>
-                <p style={{ margin: "0 0 4px 0", color: secondaryTextColor, fontSize: "14px" }}>
-                  {hoverDataOfDefault[slideIndex].location}
-                </p>
-                <p style={{ margin: "0 0 4px 0", color: secondaryTextColor, fontSize: "14px" }}>
-                  Price: ${hoverDataOfDefault[slideIndex].price}
-                </p>
-                {hoverDataOfDefault[slideIndex].modelDetails && (
-                  <p style={{ margin: "0", color: secondaryTextColor, fontSize: "12px" }}>
-                    {hoverDataOfDefault[slideIndex].modelDetails}
-                  </p>
+            {viewType === "default" &&
+                hoveredSession &&
+                hoverDataOfDefault &&
+                showPhotosOnHover &&
+                !isCanvas &&
+                !isMobile && (
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: hoverPosition.y,
+                            left: hoverPosition.x,
+                            zIndex: 100,
+                            transition: "all 0.5s ease-in-out",
+                        }}
+                    >
+                        <div
+                            ref={slideRef}
+                            style={{
+                                backgroundColor: "white",
+                                borderRadius: "8px",
+                                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                                padding: "16px",
+                                width: "300px",
+                                pointerEvents: "none",
+                            }}
+                        >
+                            {(hoverDataOfDefault[slideIndex].modelImage ||
+                                hoverDataOfDefault[slideIndex]
+                                    .locationImage) && (
+                                <div
+                                    style={{
+                                        display: "flex",
+                                        gap: "12px",
+                                        marginBottom: "12px",
+                                    }}
+                                >
+                                    {hoverDataOfDefault[slideIndex]
+                                        .modelImage && (
+                                        <img
+                                            src={
+                                                hoverDataOfDefault[slideIndex]
+                                                    .modelImage
+                                            }
+                                            alt={
+                                                hoverDataOfDefault[slideIndex]
+                                                    .model
+                                            }
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                objectFit: "cover",
+                                                borderRadius: "6px",
+                                            }}
+                                        />
+                                    )}
+                                    {hoverDataOfDefault[slideIndex]
+                                        .locationImage && (
+                                        <img
+                                            src={
+                                                hoverDataOfDefault[slideIndex]
+                                                    .locationImage
+                                            }
+                                            alt={
+                                                hoverDataOfDefault[slideIndex]
+                                                    .location
+                                            }
+                                            style={{
+                                                width: "100px",
+                                                height: "100px",
+                                                objectFit: "cover",
+                                                borderRadius: "6px",
+                                            }}
+                                        />
+                                    )}
+                                </div>
+                            )}
+
+                            <h4
+                                style={{
+                                    margin: "0 0 8px 0",
+                                    color: primaryColor,
+                                }}
+                            >
+                                {hoverDataOfDefault[slideIndex].model}
+                            </h4>
+                            <p
+                                style={{
+                                    margin: "0 0 4px 0",
+                                    color: secondaryTextColor,
+                                    fontSize: "14px",
+                                }}
+                            >
+                                {hoverDataOfDefault[slideIndex].location}
+                            </p>
+                            <p
+                                style={{
+                                    margin: "0 0 4px 0",
+                                    color: secondaryTextColor,
+                                    fontSize: "14px",
+                                }}
+                            >
+                                Price: ${hoverDataOfDefault[slideIndex].price}
+                            </p>
+                            {hoverDataOfDefault[slideIndex].modelDetails && (
+                                <p
+                                    style={{
+                                        margin: "0",
+                                        color: secondaryTextColor,
+                                        fontSize: "12px",
+                                    }}
+                                >
+                                    {
+                                        hoverDataOfDefault[slideIndex]
+                                            .modelDetails
+                                    }
+                                </p>
+                            )}
+                        </div>
+                    </div>
                 )}
-              </div>
-            </div>
-            )}
         </div>
     )
 }
