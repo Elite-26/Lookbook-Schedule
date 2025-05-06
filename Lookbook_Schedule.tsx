@@ -250,6 +250,8 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 !modalRef.current.contains(event.target as Node)
             ) {
                 setSelectedDate(null)
+                setCompactData(null)
+                setCompactIndex(null)
             }
         }
 
@@ -543,6 +545,13 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         }
 
         return statusColors[status] || primaryColor
+    }
+
+    //close button handle
+    const closeButtonHandle = () => {
+      setSelectedDate(null)
+      setCompactData(null)
+      setCompactIndex(null)
     }
 
     // Render calendar grid
@@ -1128,7 +1137,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
                   {/* Close Button */}
                   <button
-                    onClick={() => setSelectedDate(null)}
+                    onClick={() => closeButtonHandle()}
                     style={{
                       position: "absolute",
                       top: "8px",
@@ -1249,7 +1258,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
             )}
 
             {/* Selected Date Details in Compact View */}
-            {viewType === "compact" && filteredByDate && filteredByDate.length > 0 && (
+            {viewType === "compact" && compactdata && filteredByDate && filteredByDate.length > 0 && (
               <div
                 style={{
                   display: "flex",
@@ -1274,7 +1283,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 >
                   {/* Close Button */}
                   <button
-                    onClick={() => setSelectedDate(null)}
+                    onClick={() => closeButtonHandle()}
                     style={{
                       position: "absolute",
                       top: "8px",
@@ -1307,10 +1316,10 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                         backgroundColor: "#f3f4f6",
                       }}
                     >
-                      {filteredByDate[currentIndex]?.thumbnailUrl && (
+                      {compactdata.thumbnailUrl && (
                         <img
-                          src={filteredByDate[currentIndex]?.thumbnailUrl}
-                          alt={filteredByDate[currentIndex]?.model}
+                          src={compactdata.thumbnailUrl}
+                          alt={compactdata.model}
                           style={{
                             width: isMobile ? "100px" : "200px",
                             height: "100%",
@@ -1339,25 +1348,25 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                           color: primaryColor,
                         }}
                       >
-                        {filteredByDate[currentIndex]?.model || "Unknown Model"}
+                        {compactdata.model || "Unknown Model"}
                       </h3>
                       <p style={modalTextStyle}>
-                        Location: {filteredByDate[currentIndex]?.location || "Unknown"}
+                        Location: {compactdata.location || "Unknown"}
                       </p>
                       <p style={modalTextStyle}>
-                        Price: ${filteredByDate[currentIndex]?.price || 0}
+                        Price: ${compactdata.price || 0}
                       </p>
                       <p style={modalTextStyle}>
-                        Status: {filteredByDate[currentIndex]?.status}
+                        Status: {compactdata.status}
                       </p>
-                      {filteredByDate[currentIndex]?.modelDetails && (
+                      {compactdata.modelDetails && (
                         <p style={modalTextStyle}>
-                          {filteredByDate[currentIndex]?.modelDetails}
+                          {compactdata.modelDetails}
                         </p>
                       )}
-                      {filteredByDate[currentIndex]?.modelSizing && (
+                      {compactdata.modelSizing && (
                         <p style={modalTextStyle}>
-                          {filteredByDate[currentIndex]?.modelSizing}
+                          {compactdata.modelSizing}
                         </p>
                       )}
                     </div>
@@ -1366,27 +1375,27 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                   {/* WhatsApp Booking Button */}
                   <button
                     onClick={() => openWhatsApp(filteredByDate[currentIndex])}
-                    disabled={filteredByDate[currentIndex]?.status === "full"}
+                    disabled={compactdata.status === "full"}
                     style={{
                       marginTop: "16px",
                       width: "100%",
                       padding: "12px",
                       backgroundColor:
-                        filteredByDate[currentIndex]?.status === "full"
+                      compactdata.status === "full"
                           ? "#9CA3AF"
                           : "#25D366",
                       color: "#fff",
                       border: "none",
                       borderRadius: "6px",
                       cursor:
-                        filteredByDate[currentIndex]?.status === "full"
+                      compactdata.status === "full"
                           ? "not-allowed"
                           : "pointer",
                       fontWeight: 600,
                       fontSize: "16px",
                     }}
                   >
-                    {filteredByDate[currentIndex]?.status === "full"
+                    {compactdata.status === "full"
                       ? "Fully Booked"
                       : "Book via WhatsApp"}
                   </button>
