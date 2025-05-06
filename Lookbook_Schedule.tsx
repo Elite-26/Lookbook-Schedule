@@ -71,9 +71,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         defaultViewType
     )
     const [selectedDate, setSelectedDate] = useState<string | null>(null)
-    const [hoveredSession, setHoveredSession] = useState<PhotoSession | null>(
-        null
-    )
+    const [hoveredSession, setHoveredSession] = useState<PhotoSession | null>(null)
     const [hoverPosition, setHoverPosition] = useState({ x: 0, y: 0 })
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -96,7 +94,6 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
     // Function to fetch more data for a specific month
     const fetchMoreData = async (targetDate: Date) => {
-        console.log("fetchMoreDatea function --------", isCanvas, noMoreData)
         if (isCanvas) return
 
         // Don't fetch if we already know there's no more data
@@ -126,7 +123,6 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                     }),
                 }
             )
-            console.log("fetchMoreDataResponse>>>>", response)
 
             if (!response.ok) {
                 const errorData = await response.json()
@@ -293,13 +289,22 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         return new Date(year, month, 1).getDay()
     }
 
+    const [compactIndex, setCompactIndex] = useState(null)
+    const [compactdata, setCompactData] = useState<PhotoSession | null>(null)
+    const selectDateHandleCompact = (sessionsThisMonth: PhotoSession[], session: PhotoSession) => {
+      setSelectedDate(session.date)
+
+      const index = sessionsThisMonth.findIndex(s => s.date === session.date && s.model === session.model);
+      setCompactIndex(index)
+      setCompactData(sessionsThisMonth[index])
+    }
     const selectDateHandle = (date: string) => {
       setSelectedDate(date)
+      setCompactData(null)
     }
 
     useEffect(() => {
         const fetchData = async () => {
-            console.log("fetchDatea function --------")
             if (isCanvas) {
                 // Mock data for Framer canvas
                 setSessions(mockData)
@@ -331,7 +336,6 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                         }),
                     }
                 )
-                console.log("fetchDataResponse>>>>", response)
 
                 if (!response.ok) {
                     const errorData = await response.json()
@@ -360,6 +364,7 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                         const day = String(dateObj.getDate()).padStart(2, "0")
                         const formattedDate = `${year}-${month}-${day}`
 
+                        // const formattedDate = `2025-05-19`
                         return {
                             date: formattedDate,
                             model:
@@ -427,31 +432,42 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         fetchData()
     }, [isCanvas])
 
-    const [selectedDateFlag, setSelectedDateFlag] = useState(0)
     const [filteredByDate, setFilteredByDate] = useState(null)
+    const [currentIndex, setCurrentIndex] = useState(0);
     useEffect(() => {
       if(selectedDate) {
-        setSelectedDateFlag(1)
-        console.log("there is selectedDate>>>>>>>>>>>>>", selectedDateFlag)
         const filterTemp = filteredSessions.filter(
           (session) => session.date === selectedDate
         );
         setFilteredByDate(filterTemp)
-        console.log(filterTemp)
       } else {
-        setSelectedDateFlag(0)
-        console.log("there is selectedDate>>>>>>>>>>>>>", selectedDateFlag)
         setFilteredByDate(null)
       }
     }, [selectedDate])
 
-    // useEffect(() => {
-    //   if(setSelectedDateFlag) {
-    //     console.log("there is selectedDate>>>>>>>>>>>>>", selectedDateFlag)
-    //   } else {
-    //     console.log("there is selectedDate>>>>>>>>>>>>>", selectedDateFlag)
-    //   }
-    // }, [setSelectedDateFlag])
+    const goNext = () => {
+      if (filteredByDate && currentIndex < filteredByDate.length - 1) {
+        setCurrentIndex((prev) => prev + 1);
+      }
+    };
+    
+    const goPrev = () => {
+      if (filteredByDate && currentIndex > 0) {
+        setCurrentIndex((prev) => prev - 1);
+      }
+    };
+
+    const [hoverDataOfDefault, setHoverDataOfDefault] = useState(null)
+    useEffect(() => {
+      if(viewType === "default" && hoveredSession) {
+        const filterTemp = filteredSessions.filter(
+          (session) => session.date === hoveredSession.date
+        ).slice(0, 5)
+        setHoverDataOfDefault(filterTemp)
+      } else {
+        setHoverDataOfDefault(null)
+      }
+    }, [hoveredSession])
 
     // Filter sessions by location
     const filteredSessions = useMemo(() => {
@@ -493,12 +509,14 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
         const previewHeight = 220
 
         if (posX + previewWidth > rect.width) {
-            posX = mouseX - previewWidth
+            posX = posX - previewWidth
         }
         if (posY + previewHeight > rect.height) {
-            posY = mouseY - previewHeight
+            posY = posY - previewHeight
         }
 
+        // console.log(posX, posY)
+        // console.log(rect)
         setHoverPosition({ x: posX, y: posY })
         setHoveredSession(session)
     }
@@ -526,7 +544,6 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
 
         return statusColors[status] || primaryColor
     }
-
 
     // Render calendar grid
     const renderCalendar = () => {
@@ -572,7 +589,8 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                                     handleSessionHover(e, session)
                                 }
                                 onMouseLeave={() => setHoveredSession(null)}
-                                onClick={() => selectDateHandle(session.date)}
+                                // onClick={() => selectDateHandle(session.date)}
+                                onClick={() => selectDateHandleCompact(sessionsThisMonth, session)}
                                 style={{
                                     padding: "12px 20px",
                                     marginBottom: "12px",
@@ -580,11 +598,12 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                                     borderRadius: "6px",
                                     cursor: "pointer",
                                     backgroundColor:
-                                        selectedDate === session.date
+                                        idx === compactIndex
+                                        // selectedDate === session.date
                                             ? primaryColor
                                             : "white",
                                     color:
-                                        selectedDate === session.date
+                                        idx === compactIndex
                                             ? primaryTextColor
                                             : primaryColor,
                                     transition: "all 0.2s ease",
@@ -854,10 +873,8 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 <button
                     onClick={() => {
                         const newDate = new Date(currentDate)
-                        console.log("prevNewDate>>>>", newDate)
                         newDate.setMonth(currentDate.getMonth() - 1)
                         setCurrentDate(newDate)
-                        console.log("prevDate>>>>", newDate)
 
                         // Check if we need to load more data
                         const monthKey = `${newDate.getFullYear()}-${newDate.getMonth()}`
@@ -884,10 +901,8 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 <button
                     onClick={() => {
                         const newDate = new Date(currentDate)
-                        console.log("prevNewDate>>>>", newDate)
                         newDate.setMonth(currentDate.getMonth() + 1)
                         setCurrentDate(newDate)
-                        console.log("nextDate>>>>", newDate)
 
                         // Check if we need to load more data
                         const monthKey = `${newDate.getFullYear()}-${newDate.getMonth()}`
@@ -1051,192 +1066,350 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                 )}
             </div>
 
-            {/* Selected Date Details */}
-            {selectedDate && (
-              <AnimatePresence>
-                <button
-                  // onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                  // disabled={currentPage >= totalPages - 1}
+            {/* Selected Date Details in Default View */}
+            {viewType === "default" && filteredByDate && filteredByDate.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center"
+                }}
+              >
+                <div
                   style={{
-                      padding: "8px 12px",
-                      backgroundColor: "#e5e7eb",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      position: "absolute"
+                    position: "absolute",
+                    bottom: isMobile ? "60px" : "360px",
+                    left: isMobile ? "16px" : "",
+                    right: isMobile ? "16px" : "",
+                    margin: isMobile ? "0 auto" : undefined,
+                    padding: "16px",
+                    backgroundColor: "#ffffff",
+                    borderRadius: "12px",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                    border: "1px solid #e5e7eb",
+                    zIndex: 50,
+                    width: isMobile ? "" : "600px",
                   }}
                 >
-                  Next
-              </button>
-              {filteredSessions
-                  .filter((session) => session.date === selectedDate)
-                  .slice(0, 5)
-                  .map((session: PhotoSession, idx: number) => (
-                      <motion.div
-                          key={'modal-session-1'}
-                          ref={modalRef}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 20 }}
-                          transition={{ duration: 0.25, ease: "easeOut" }}
+                  <button
+                    onClick={goPrev}
+                    disabled={currentIndex === 0}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "90px",
+                      background: "none",
+                      border: "none",
+                      fontSize: "24px",
+                      color: secondaryTextColor,
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                  >
+                    {filteredByDate.length > 1 ? '<' : null}
+                  </button>
+
+                  <button
+                    onClick={goNext}
+                    disabled={currentIndex === filteredByDate.length - 1}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "50px",
+                      background: "none",
+                      border: "none",
+                      fontSize: "24px",
+                      color: secondaryTextColor,
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                  >
+                    {filteredByDate.length > 1 ? '>' : null}
+                  </button>
+
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      background: "none",
+                      border: "none",
+                      fontSize: "24px",
+                      color: secondaryTextColor,
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                    aria-label="Close"
+                  >
+                    ×
+                  </button>
+
+                  {/* Modal Content */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "16px",
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div
+                      style={{
+                        aspectRatio: "4 / 5",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        backgroundColor: "#f3f4f6",
+                      }}
+                    >
+                      {filteredByDate[currentIndex]?.thumbnailUrl && (
+                        <img
+                          src={filteredByDate[currentIndex]?.thumbnailUrl}
+                          alt={filteredByDate[currentIndex]?.model}
                           style={{
-                              position: "absolute",
-                              bottom: isMobile ? "60px" : "360px",
-                              left: isMobile ? "16px" : "",
-                              right: isMobile ? "16px" : "",
-                              margin: isMobile ? "0 auto" : undefined,
-                              padding: "16px",
-                              backgroundColor: "#ffffff",
-                              borderRadius: "12px",
-                              boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
-                              border: "1px solid #e5e7eb",
-                              zIndex: 50,
-                              width: isMobile ? "" : "600px",
+                            width: isMobile ? "100px" : "200px",
+                            height: "100%",
+                            objectFit: "cover",
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            display: "block",
                           }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Session Text Details */}
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin: "0 0 8px 0",
+                          color: primaryColor,
+                        }}
                       >
-                          {/* Close Button */}
-                          <button
-                              onClick={() => setSelectedDate(null)}
-                              style={{
-                                  position: "absolute",
-                                  top: "8px",
-                                  right: "8px",
-                                  background: "none",
-                                  border: "none",
-                                  fontSize: "24px",
-                                  color: secondaryTextColor,
-                                  cursor: "pointer",
-                                  padding: 0,
-                              }}
-                              aria-label="Close"
-                          >
-                              ×
-                          </button>
+                        {filteredByDate[currentIndex]?.model || "Unknown Model"}
+                      </h3>
+                      <p style={modalTextStyle}>
+                        Location: {filteredByDate[currentIndex]?.location || "Unknown"}
+                      </p>
+                      <p style={modalTextStyle}>
+                        Price: ${filteredByDate[currentIndex]?.price || 0}
+                      </p>
+                      <p style={modalTextStyle}>
+                        Status: {filteredByDate[currentIndex]?.status}
+                      </p>
+                      {filteredByDate[currentIndex]?.modelDetails && (
+                        <p style={modalTextStyle}>
+                          {filteredByDate[currentIndex]?.modelDetails}
+                        </p>
+                      )}
+                      {filteredByDate[currentIndex]?.modelSizing && (
+                        <p style={modalTextStyle}>
+                          {filteredByDate[currentIndex]?.modelSizing}
+                        </p>
+                      )}
+                    </div>
+                  </div>
 
-                          {/* Modal Content */}
-                          <div
-                              style={{
-                                  display: "flex",
-                                  gap: "16px",
-                              }}
-                          >
-                              {/* Thumbnail */}
-                              <div
-                                  style={{
-                                      aspectRatio: "4 / 5",
-                                      borderRadius: "8px",
-                                      overflow: "hidden",
-                                      backgroundColor: "#f3f4f6",
-                                  }}
-                              >
-                                  {session.thumbnailUrl && (
-                                      <img
-                                          src={session.thumbnailUrl}
-                                          alt={session.model}
-                                          style={{
-                                              width: isMobile
-                                                  ? "100px"
-                                                  : "200px",
-                                              height: "100%",
-                                              objectFit: "cover",
-                                              maxWidth: "100%",
-                                              maxHeight: "100%",
-                                              display: "block",
-                                          }}
-                                      />
-                                  )}
-                              </div>
+                  {/* WhatsApp Booking Button */}
+                  <button
+                    onClick={() => openWhatsApp(filteredByDate[currentIndex])}
+                    disabled={filteredByDate[currentIndex]?.status === "full"}
+                    style={{
+                      marginTop: "16px",
+                      width: "100%",
+                      padding: "12px",
+                      backgroundColor:
+                        filteredByDate[currentIndex]?.status === "full"
+                          ? "#9CA3AF"
+                          : "#25D366",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor:
+                        filteredByDate[currentIndex]?.status === "full"
+                          ? "not-allowed"
+                          : "pointer",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                    }}
+                  >
+                    {filteredByDate[currentIndex]?.status === "full"
+                      ? "Fully Booked"
+                      : "Book via WhatsApp"}
+                  </button>
+                </div>
+              </div>
+            )}
 
-                              {/* Session Text Details */}
-                              <div
-                                  style={{
-                                      flex: 1,
-                                      display: "flex",
-                                      flexDirection: "column",
-                                      justifyContent: "center",
-                                      gap: "4px",
-                                  }}
-                              >
-                                  <h3
-                                      style={{
-                                          margin: "0 0 8px 0",
-                                          color: primaryColor,
-                                      }}
-                                  >
-                                      {session.model || "Unknown Model"}
-                                  </h3>
-                                  <p style={modalTextStyle}>
-                                      Location:{" "}
-                                      {session.location || "Unknown"}
-                                  </p>
-                                  <p style={modalTextStyle}>
-                                      Price: ${session.price || 0}
-                                  </p>
-                                  <p style={modalTextStyle}>
-                                      Status: {session.status}
-                                  </p>
-                                  {session.modelDetails && (
-                                      <p style={modalTextStyle}>
-                                          {session.modelDetails}
-                                      </p>
-                                  )}
-                                  {session.modelSizing && (
-                                      <p style={modalTextStyle}>
-                                          {session.modelSizing}
-                                      </p>
-                                  )}
-                              </div>
-                          </div>
+            {/* Selected Date Details in Compact View */}
+            {viewType === "compact" && filteredByDate && filteredByDate.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center"
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: isMobile ? "60px" : "360px",
+                    left: isMobile ? "16px" : "",
+                    right: isMobile ? "16px" : "",
+                    margin: isMobile ? "0 auto" : undefined,
+                    padding: "16px",
+                    backgroundColor: "#ffffff",
+                    borderRadius: "12px",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.15)",
+                    border: "1px solid #e5e7eb",
+                    zIndex: 50,
+                    width: isMobile ? "" : "600px",
+                  }}
+                >
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      background: "none",
+                      border: "none",
+                      fontSize: "24px",
+                      color: secondaryTextColor,
+                      cursor: "pointer",
+                      padding: 0,
+                    }}
+                    aria-label="Close"
+                  >
+                    ×
+                  </button>
 
-                          {/* WhatsApp Booking Button */}
-                          <button
-                              onClick={() => openWhatsApp(session)}
-                              disabled={session.status === "full"}
-                              style={{
-                                  marginTop: "16px",
-                                  width: "100%",
-                                  padding: "12px",
-                                  backgroundColor:
-                                      session.status === "full"
-                                          ? "#9CA3AF"
-                                          : "#25D366",
-                                  color: "#fff",
-                                  border: "none",
-                                  borderRadius: "6px",
-                                  cursor:
-                                      session.status === "full"
-                                          ? "not-allowed"
-                                          : "pointer",
-                                  fontWeight: 600,
-                                  fontSize: "16px",
-                              }}
-                          >
-                              {session.status === "full"
-                                  ? "Fully Booked"
-                                  : "Book via WhatsApp"}
-                          </button>
-                      </motion.div>
-                  ))}
-          </AnimatePresence>
-                
+                  {/* Modal Content */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "16px",
+                    }}
+                  >
+                    {/* Thumbnail */}
+                    <div
+                      style={{
+                        aspectRatio: "4 / 5",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        backgroundColor: "#f3f4f6",
+                      }}
+                    >
+                      {filteredByDate[currentIndex]?.thumbnailUrl && (
+                        <img
+                          src={filteredByDate[currentIndex]?.thumbnailUrl}
+                          alt={filteredByDate[currentIndex]?.model}
+                          style={{
+                            width: isMobile ? "100px" : "200px",
+                            height: "100%",
+                            objectFit: "cover",
+                            maxWidth: "100%",
+                            maxHeight: "100%",
+                            display: "block",
+                          }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Session Text Details */}
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        gap: "4px",
+                      }}
+                    >
+                      <h3
+                        style={{
+                          margin: "0 0 8px 0",
+                          color: primaryColor,
+                        }}
+                      >
+                        {filteredByDate[currentIndex]?.model || "Unknown Model"}
+                      </h3>
+                      <p style={modalTextStyle}>
+                        Location: {filteredByDate[currentIndex]?.location || "Unknown"}
+                      </p>
+                      <p style={modalTextStyle}>
+                        Price: ${filteredByDate[currentIndex]?.price || 0}
+                      </p>
+                      <p style={modalTextStyle}>
+                        Status: {filteredByDate[currentIndex]?.status}
+                      </p>
+                      {filteredByDate[currentIndex]?.modelDetails && (
+                        <p style={modalTextStyle}>
+                          {filteredByDate[currentIndex]?.modelDetails}
+                        </p>
+                      )}
+                      {filteredByDate[currentIndex]?.modelSizing && (
+                        <p style={modalTextStyle}>
+                          {filteredByDate[currentIndex]?.modelSizing}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* WhatsApp Booking Button */}
+                  <button
+                    onClick={() => openWhatsApp(filteredByDate[currentIndex])}
+                    disabled={filteredByDate[currentIndex]?.status === "full"}
+                    style={{
+                      marginTop: "16px",
+                      width: "100%",
+                      padding: "12px",
+                      backgroundColor:
+                        filteredByDate[currentIndex]?.status === "full"
+                          ? "#9CA3AF"
+                          : "#25D366",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor:
+                        filteredByDate[currentIndex]?.status === "full"
+                          ? "not-allowed"
+                          : "pointer",
+                      fontWeight: 600,
+                      fontSize: "16px",
+                    }}
+                  >
+                    {filteredByDate[currentIndex]?.status === "full"
+                      ? "Fully Booked"
+                      : "Book via WhatsApp"}
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Hover Preview */}
             {/* Hover Preview */}
-            {hoveredSession && showPhotosOnHover && !isCanvas && !isMobile && (
+            {viewType === "compact" && hoveredSession && showPhotosOnHover && !isCanvas && !isMobile && (
                 <div
                     ref={previewRef}
                     style={{
-                        position: "absolute",
-                        bottom: hoverPosition.y,
-                        left: hoverPosition.x,
-                        backgroundColor: "white",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                        padding: "16px",
-                        width: "300px",
-                        zIndex: 10,
-                        pointerEvents: "none",
+                      position: "absolute",
+                      bottom: hoverPosition.y,
+                      left: hoverPosition.x,
+                      backgroundColor: "white",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      padding: "16px",
+                      width: "300px",
+                      zIndex: 10,
+                      pointerEvents: "none",
                     }}
                 >
                     {(hoveredSession.modelImage ||
@@ -1308,6 +1481,106 @@ export default function PhotoBookingCalendar(props: CalendarComponentProps) {
                         </p>
                     )}
                 </div>
+            )}
+            {viewType === "default" && hoveredSession && hoverDataOfDefault && showPhotosOnHover && !isCanvas && !isMobile && (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '5px',
+                  position: "absolute",
+                  bottom: hoverPosition.y,
+                  left: hoverPosition.x,
+                  zIndex: 100
+                }}
+              >
+                {hoverDataOfDefault.map((session) => (
+                  <div
+                      ref={previewRef}
+                      style={{
+                          // position: "absolute",
+                          // bottom: hoverPosition.y,
+                          // left: hoverPosition.x,
+                          backgroundColor: "white",
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                          padding: "16px",
+                          width: "300px",
+                          zIndex: 100,
+                          pointerEvents: "none",
+                      }}
+                  >
+                      {(session.modelImage ||
+                          session.locationImage) && (
+                          <div
+                              style={{
+                                  display: "flex",
+                                  gap: "12px",
+                                  marginBottom: "12px",
+                              }}
+                          >
+                              {session.modelImage && (
+                                  <img
+                                      src={session.modelImage}
+                                      alt={session.model}
+                                      style={{
+                                          width: "100px",
+                                          height: "100px",
+                                          objectFit: "cover",
+                                          borderRadius: "6px",
+                                      }}
+                                  />
+                              )}
+                              {session.locationImage && (
+                                  <img
+                                      src={session.locationImage}
+                                      alt={session.location}
+                                      style={{
+                                          width: "100px",
+                                          height: "100px",
+                                          objectFit: "cover",
+                                          borderRadius: "6px",
+                                      }}
+                                  />
+                              )}
+                          </div>
+                      )}
+
+                      <h4 style={{ margin: "0 0 8px 0", color: primaryColor }}>
+                          {session.model}
+                      </h4>
+                      <p
+                          style={{
+                              margin: "0 0 4px 0",
+                              color: secondaryTextColor,
+                              fontSize: "14px",
+                          }}
+                      >
+                          {session.location}
+                      </p>
+                      <p
+                          style={{
+                              margin: "0 0 4px 0",
+                              color: secondaryTextColor,
+                              fontSize: "14px",
+                          }}
+                      >
+                          Price: ${session.price}
+                      </p>
+                      {session.modelDetails && (
+                          <p
+                              style={{
+                                  margin: "0",
+                                  color: secondaryTextColor,
+                                  fontSize: "12px",
+                              }}
+                          >
+                              {session.modelDetails}
+                          </p>
+                      )}
+                  </div>
+                ))}
+              </div>
             )}
         </div>
     )
